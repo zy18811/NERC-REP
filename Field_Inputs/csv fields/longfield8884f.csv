@@ -1,0 +1,52 @@
+"","Crop.Group","Variety","Field.Defined.Name","Fertiliser.Nutrient.Name","Actual.Issued.Date","Product.Name","Rate.per.Application.Area.ha","Units","Fertiliser.Nutrient.Rate.per.Working.Area"
+"42","Barley Spring","Quench","Long field.8884","K2O","04/03/2011","MOP",172.72,"kg",103.63
+"44","Barley Spring","Quench","Long field.8884","N","12/03/2011","34.5%n",197.35,"kg",68.09
+"45","Barley Spring","Quench","Long field.8884","N","15/04/2011","34.5%n",106.9,"kg",36.88
+"1026","Rape Winter","Palmedor","Long field.8884","K2O","25/08/2011","Cattle Fym",10,"t",72
+"1027","Rape Winter","Palmedor","Long field.8884","K2O","15/08/2012","Pig Slurry",30,"m3",64.8
+"1029","Rape Winter","Palmedor","Long field.8884","Manure NH4-N","25/08/2011","Cattle Fym",10,"t",5
+"1030","Rape Winter","Palmedor","Long field.8884","Manure NH4-N","15/08/2012","Pig Slurry",30,"m3",75.47
+"1032","Rape Winter","Palmedor","Long field.8884","Manure NO3-N","25/08/2011","Cattle Fym",10,"t",1
+"1034","Rape Winter","Palmedor","Long field.8884","Manure Total K20","25/08/2011","Cattle Fym",10,"t",80
+"1035","Rape Winter","Palmedor","Long field.8884","Manure Total K20","15/08/2012","Pig Slurry",30,"m3",72
+"1037","Rape Winter","Palmedor","Long field.8884","Manure Total MgO","25/08/2011","Cattle Fym",10,"t",18
+"1038","Rape Winter","Palmedor","Long field.8884","Manure Total MgO","15/08/2012","Pig Slurry",30,"m3",21
+"1040","Rape Winter","Palmedor","Long field.8884","Manure Total N","25/08/2011","Cattle Fym",10,"t",60
+"1041","Rape Winter","Palmedor","Long field.8884","Manure Total N","15/08/2012","Pig Slurry",30,"m3",108
+"1043","Rape Winter","Palmedor","Long field.8884","Manure Total P205","25/08/2011","Cattle Fym",10,"t",32
+"1044","Rape Winter","Palmedor","Long field.8884","Manure Total P205","15/08/2012","Pig Slurry",30,"m3",54
+"1046","Rape Winter","Palmedor","Long field.8884","Manure Total SO3","25/08/2011","Cattle Fym",10,"t",24
+"1047","Rape Winter","Palmedor","Long field.8884","Manure Total SO3","15/08/2012","Pig Slurry",30,"m3",29.1
+"1049","Rape Winter","Palmedor","Long field.8884","N","25/08/2011","Cattle Fym",10,"t",6
+"1050","Rape Winter","Palmedor","Long field.8884","N","04/09/2011","34.5%n",103,"kg",35.53
+"1051","Rape Winter","Palmedor","Long field.8884","N","28/02/2012","Sulphur +",297.91,"kg",86.4
+"1052","Rape Winter","Palmedor","Long field.8884","N","23/03/2012","34.5%n",350,"kg",120.75
+"1053","Rape Winter","Palmedor","Long field.8884","N","15/08/2012","Pig Slurry",30,"m3",66
+"1055","Rape Winter","Palmedor","Long field.8884","P2O5","25/08/2011","Cattle Fym",10,"t",19.2
+"1056","Rape Winter","Palmedor","Long field.8884","P2O5","15/08/2012","Pig Slurry",30,"m3",27
+"1058","Rape Winter","Palmedor","Long field.8884","SO3","28/02/2012","Sulphur +",297.91,"kg",59.58
+"1368","Wheat Winter","Dickens","Long field.8884","N","10/03/2015","Sulphur +",140,"kg",40.6
+"1369","Wheat Winter","Dickens","Long field.8884","N","06/04/2015","34.5%n",230,"kg",79.35
+"1370","Wheat Winter","Dickens","Long field.8884","N","30/04/2015","34.5%n",210,"kg",72.45
+"1372","Wheat Winter","Dickens","Long field.8884","SO3","10/03/2015","Sulphur +",140,"kg",28
+"1554","Wheat Winter","Grafton","Long field.8884","N","08/03/2010","34.5%n",124.68,"kg",43.01
+"1555","Wheat Winter","Grafton","Long field.8884","N","16/04/2010","34.5%n",229.05,"kg",79.02
+"1556","Wheat Winter","Grafton","Long field.8884","N","11/05/2010","34.5%n",163.85,"kg",56.53
+"1826","Wheat Winter","JB Diego","Long field.8884","K2O","15/08/2012","Pig Slurry",30,"m3",32.4
+"1827","Wheat Winter","JB Diego","Long field.8884","K2O","22/02/2013","MOP",165,"kg",49.5
+"1829","Wheat Winter","JB Diego","Long field.8884","Manure NH4-N","15/08/2012","Pig Slurry",30,"m3",37.74
+"1831","Wheat Winter","JB Diego","Long field.8884","Manure Total K20","15/08/2012","Pig Slurry",30,"m3",36
+"1833","Wheat Winter","JB Diego","Long field.8884","Manure Total MgO","15/08/2012","Pig Slurry",30,"m3",10.5
+"1835","Wheat Winter","JB Diego","Long field.8884","Manure Total N","15/08/2012","Pig Slurry",30,"m3",54
+"1837","Wheat Winter","JB Diego","Long field.8884","Manure Total P205","15/08/2012","Pig Slurry",30,"m3",27
+"1839","Wheat Winter","JB Diego","Long field.8884","Manure Total SO3","15/08/2012","Pig Slurry",30,"m3",14.55
+"1841","Wheat Winter","JB Diego","Long field.8884","N","15/08/2012","Pig Slurry",30,"m3",33
+"1842","Wheat Winter","JB Diego","Long field.8884","N","21/02/2013","Sulphur +",140,"kg",20.3
+"1843","Wheat Winter","JB Diego","Long field.8884","N","04/04/2013","34.5%n",290,"kg",50.03
+"1844","Wheat Winter","JB Diego","Long field.8884","N","17/05/2013","34.5%n",115,"kg",19.84
+"1845","Wheat Winter","JB Diego","Long field.8884","N","10/03/2017","Urea Blend 33%N 30SO3",185,"kg",30.53
+"1846","Wheat Winter","JB Diego","Long field.8884","N","07/04/2017","34.5%n",220,"kg",37.95
+"1847","Wheat Winter","JB Diego","Long field.8884","N","27/04/2017","34.5%n",190,"kg",32.77
+"1849","Wheat Winter","JB Diego","Long field.8884","P2O5","15/08/2012","Pig Slurry",30,"m3",13.5
+"1851","Wheat Winter","JB Diego","Long field.8884","SO3","21/02/2013","Sulphur +",140,"kg",14
+"1852","Wheat Winter","JB Diego","Long field.8884","SO3","10/03/2017","Urea Blend 33%N 30SO3",185,"kg",27.75
