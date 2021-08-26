@@ -45,7 +45,7 @@ def get_july21_temp_data():
     soil_df = soil_df.reindex(ix)
     soil_df['q10cm_soil_temp'] = pd.to_numeric(soil_df['q10cm_soil_temp'])
     soil_df = soil_df.rename(columns={"q10cm_soil_temp": "q10cm_soil_temp_raw"})
-    soil_df['q10cm_soil_temp_interp'] = soil_df['q10cm_soil_temp_raw'].interpolate(method='time')
+    soil_df['q10cm_soil_temp_interp'] = soil_df['q10cm_soil_temp_raw'].interpolate(method='time',limit_direction = 'both')
 
 
     air_df = pd.read_csv("Full Temperature Data/Full Air Temp/midas_tempdrnl_202101-202112.txt",header=0,
@@ -84,7 +84,14 @@ def get_july21_temp_data():
     air_numeric_cols = ['max_air_temp','min_air_temp','min_grss_temp','min_conc_temp']
     air_df[air_numeric_cols] = air_df[air_numeric_cols].apply(pd.to_numeric,errors = 'coerce')
 
+    air_df[['max_air_temp_interp', 'min_air_temp_interp', 'min_grss_temp_interp', 'min_conc_temp_interp']] = air_df[
+        air_numeric_cols].apply(pd.Series.interpolate, method='time',limit_direction = 'both')
+    air_df = air_df.rename(columns={'max_air_temp':'max_air_temp_raw','min_air_temp':'min_air_temp_raw',
+                                    'min_grss_temp':'min_grss_temp_raw','min_conc_temp':'min_conc_temp_raw'})
+
+
     temp_df = pd.concat([soil_df,air_df],axis = 1)
+
     #temp_df = temp_df.reset_index(level=0).rename(columns={'index': 'ob_time'})
 
     return temp_df
@@ -119,7 +126,7 @@ def get_july21_rain_data():
     df = df.reindex(ix)
     df['prcp_amt'] = pd.to_numeric(df['prcp_amt'])
     df = df.rename(columns={"prcp_amt": "prcp_amt_raw"})
-    df['prcp_amt_interp'] = df['prcp_amt_raw'].interpolate(method='time')
+    df['prcp_amt_interp'] = df['prcp_amt_raw'].interpolate(method='time',limit_direction = 'both')
 
     return df
 
@@ -160,7 +167,7 @@ def get_july21_sol_data():
     df = df.reindex(ix)
     df['glbl_irad_amt'] = pd.to_numeric(df['glbl_irad_amt'])
     df = df.rename(columns={"glbl_irad_amt": "glbl_irad_amt_raw"})
-    df['glbl_irad_amt_interp'] = df['glbl_irad_amt_raw'].interpolate(method='time')
+    df['glbl_irad_amt_interp'] = df['glbl_irad_amt_raw'].interpolate(method='time',limit_direction = 'both')
     return df
 
 
@@ -203,23 +210,30 @@ def get_july21_wind_data():
     numeric_cols = ['mean_wind_dir','mean_wind_speed','max_gust_dir','max_gust_speed']
     df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric)
 
-    df[['mean_wind_dir_interp','mean_wind_speed_interp','max_gust_dir_interp','max_gust_speed_interp']] = df[numeric_cols].apply(pd.Series.interpolate,method = 'time')
+    df[['mean_wind_dir_interp','mean_wind_speed_interp','max_gust_dir_interp','max_gust_speed_interp']] = df[numeric_cols].apply(pd.Series.interpolate,method = 'time',limit_direction = 'both')
     df = df.rename(columns={'mean_wind_dir': 'mean_wind_dir_raw', 'mean_wind_speed': 'mean_wind_speed_raw',
                             'max_gust_dir': 'max_gust_dir_raw', 'max_gust_speed': 'max_gust_speed_raw'})
     return df
 
-def get_july21_midas_data():
+def get_july21_midas_data(interp_or_raw = 'raw'):
     temp_df = get_july21_temp_data()
     rain_df = get_july21_rain_data()
     sol_df = get_july21_sol_data()
     wind_df = get_july21_wind_data()
 
     midas_df = pd.concat([temp_df,rain_df,sol_df,wind_df],axis = 1)
+
+    if interp_or_raw == 'raw':
+        midas_df = midas_df[midas_df.columns.drop(list(midas_df.filter(regex='interp')))]
+    elif interp_or_raw == 'interp':
+        midas_df = midas_df[midas_df.columns.drop(list(midas_df.filter(regex='raw')))]
+
+    midas_df[midas_df.columns] = midas_df[midas_df.columns].apply(pd.to_numeric)
     #midas_df = midas_df.reset_index(level=0).rename(columns={'index': 'ob_time'})
     return midas_df
 
 if __name__ == '__main__':
-    #print(get_july21_temp_data())
+    print(get_july21_temp_data())
     #print(get_july21_rain_data())
     #print(get_july21_sol_data())
     #print(get_july21_wind_data())
@@ -232,7 +246,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(x_scaled, columns = df.columns)
     for col in df.columns:
 
-        if not col[-6:] == 'interp':
+        if col[-6:] == 'interp':
             plot_data = df[col].dropna()
             plt.plot(plot_data.index.values, plot_data.values, label=col)
         else:
