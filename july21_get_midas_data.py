@@ -4,6 +4,7 @@ import datetime
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
+
 def get_july21_temp_data():
     soil_df = pd.read_csv("Full Temperature Data/Full Soil Temp/midas_soiltemp_202101-202112.txt", header=0,
                             low_memory = False, names=['id',
@@ -225,21 +226,27 @@ def get_july21_midas_data(interp_or_raw = 'raw'):
 
     if interp_or_raw == 'raw':
         midas_df = midas_df[midas_df.columns.drop(list(midas_df.filter(regex='interp')))]
+        midas_df = midas_df.rename(columns=lambda x: x.replace('_raw',''))
     elif interp_or_raw == 'interp':
         midas_df = midas_df[midas_df.columns.drop(list(midas_df.filter(regex='raw')))]
+        midas_df = midas_df.rename(columns=lambda x: x.replace('_interp',''))
 
     midas_df[midas_df.columns] = midas_df[midas_df.columns].apply(pd.to_numeric)
     #midas_df = midas_df.reset_index(level=0).rename(columns={'index': 'ob_time'})
     return midas_df
 
 if __name__ == '__main__':
-    print(get_july21_temp_data())
+    #print(get_july21_temp_data())
     #print(get_july21_rain_data())
     #print(get_july21_sol_data())
     #print(get_july21_wind_data())
     midas0721 = get_july21_midas_data()
 
     df = midas0721
+
+    print(df)
+
+    '''
     x = df.values
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
@@ -253,3 +260,4 @@ if __name__ == '__main__':
             pass
     plt.legend()
     plt.show()
+    '''
