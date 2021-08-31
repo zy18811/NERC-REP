@@ -25,4 +25,4 @@ def get_july21_flux_data(raw_or_interp='raw'):
         return df
 
 if __name__ == '__main__':
-    print(get_july21_flux_data())
+    print(get_july21_flux_data('interp').index)

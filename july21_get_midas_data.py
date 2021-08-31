@@ -244,7 +244,7 @@ if __name__ == '__main__':
 
     df = midas0721
 
-    print(df)
+    print(df.index)
 
     '''
     x = df.values

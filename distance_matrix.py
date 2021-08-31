@@ -204,7 +204,8 @@ def graphFeatureGroupsSubplots(df,featureGrouping,title = None):
 
 
 if __name__ == '__main__':
-    data_df = get_july21_all_data()
+    data_df = get_july21_all_data('interp')
+    #print(data_df)
     df = data_df
 
     x = df.values
