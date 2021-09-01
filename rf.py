@@ -104,15 +104,95 @@ def combi_importances(combi,df,n_steps, n_trees,pbar):
                                f'ev_score_{col}', f'mape_{col}']] = col_importances
         i+=1
 
-    all_combi_importances_lags_summed = pd.DataFrame(columns=all_combi_importances.columns)
-    for col in combi:
-        pbar.set_postfix_str(f'{i}/{len(combi) * 2}', refresh=True)
-        col_lag_sum = all_combi_importances.filter(axis=0, regex=f"^{col}_-\d+").sum(axis=0)
-        all_combi_importances_lags_summed.loc[col] = col_lag_sum
-        i+=1
 
-    return (all_combi_importances,all_combi_importances_lags_summed)
+    return all_combi_importances
 
+
+def total_norm_scale_sort(imp_df, data_df):
+    for col in data_df.columns:
+        # metrics = r2, ev_score, mse, mape
+        scale_func = lambda x : x[f'importance_{col}'] * x[f'r2_{col}']# / x[f'mape_{col}']
+        imp_df = imp_df.assign(new_col = scale_func)
+        imp_df = imp_df.rename(columns={'new_col':f'scaled_importance_{col}'})
+
+    imp_df['total_importance'] = imp_df[[f"importance_{col}" for col in data_df.columns]].sum(axis=1)
+    imp_df['total_scaled_importance'] = imp_df[[f"scaled_importance_{col}" for col in data_df.columns]].sum(axis=1)
+
+    imp_df['normed_total_importance'] = imp_df['total_importance'] / imp_df['total_importance'].sum()
+
+    if imp_df['total_scaled_importance'].min()<0:
+        min_val =  imp_df['total_scaled_importance'].min()
+        imp_df['normed_total_scaled_importance'] = (imp_df['total_scaled_importance']-min_val) / (imp_df['total_scaled_importance']-min_val).sum()
+    else:
+        imp_df['normed_total_scaled_importance'] = imp_df['total_scaled_importance'] / imp_df['total_scaled_importance'].sum()
+
+    imp_df = imp_df.sort_values('normed_total_scaled_importance', ascending=False)
+    return imp_df
+
+
+def combi_summed_importances(n_steps,n_trees,combis,df):
+    all_importance_cols = np.array([[f"importance_{col}", f'mse_{col}', f'r2_{col}',
+                                     f'ev_score_{col}', f'mape_{col}'] for col in df.columns]).ravel()
+
+    all_importance_index = [f"{col}_-{i}" for i in range(1, n_steps + 1) for col in df.columns]
+
+    all_importances = pd.DataFrame(index=all_importance_index, columns=all_importance_cols)
+
+    all_column_groups_combinations = combis
+
+    with tqdm(all_column_groups_combinations, position=0, leave=True) as pbar:
+        for combi in pbar:
+            all_combi_importances = combi_importances(combi, df, n_steps, n_trees, pbar)
+
+            sect = all_importances.columns.intersection(all_combi_importances.columns)
+
+            all_importances[sect] = all_importances[sect].add(all_combi_importances[sect], fill_value=0)
+
+    all_importances = total_norm_scale_sort(all_importances, df)
+    all_importances_normed_totals = all_importances[['normed_total_importance', 'normed_total_scaled_importance']]
+    all_importances_normed_totals_lags_summed = pd.DataFrame(columns=all_importances_normed_totals.columns)
+    for col in df.columns:
+        col_lag_sum = all_importances.filter(axis=0, regex=f"^{col}_-\d+").sum(axis=0)
+        all_importances_normed_totals_lags_summed.loc[col] = col_lag_sum
+    all_importances_normed_totals_lags_summed = all_importances_normed_totals_lags_summed.sort_values(
+        'normed_total_scaled_importance', ascending=False)
+
+    all_imp_nt = all_importances_normed_totals
+    all_imp_nt_ls = all_importances_normed_totals_lags_summed
+
+    return all_imp_nt,all_imp_nt_ls
+
+
+def col_4_cols_importances(n_steps,n_trees,df):
+    importance_cols = np.array([[f"importance_{col}", f'mse_{col}', f'r2_{col}',
+                                 f'ev_score_{col}', f'mape_{col}'] for col in df.columns]).ravel()
+    all_importances = pd.DataFrame(columns=importance_cols)
+    for col in tqdm(df.columns):
+        importances = get_rf_importances(df, df.columns, col, n_steps, n_trees)
+        for i in range(1, n_steps + 1):
+            importances.loc[f"{col}_-{i}", 'importance'] = 0
+        importances = importances.fillna(importances.mean())
+        col_importances = importances.rename(columns={'importance': f"importance_{col}",
+                                                      'mse': f"mse_{col}", 'r2': f"r2_{col}",
+                                                      'ev_score': f"ev_score_{col}",
+                                                      'mape': f"mape_{col}"})
+
+        all_importances[[f"importance_{col}", f'mse_{col}', f'r2_{col}',
+                         f'ev_score_{col}', f'mape_{col}']] = col_importances
+
+    all_importances = total_norm_scale_sort(all_importances, df)
+    all_importances_normed_totals = all_importances[['normed_total_importance', 'normed_total_scaled_importance']]
+    all_importances_normed_totals_lags_summed = pd.DataFrame(columns=all_importances_normed_totals.columns)
+
+    for col in df.columns:
+        col_lag_sum = all_importances.filter(axis=0, regex=f"^{col}_-\d+").sum(axis=0)
+        all_importances_normed_totals_lags_summed.loc[col] = col_lag_sum
+    all_importances_normed_totals_lags_summed = all_importances_normed_totals_lags_summed.sort_values(
+        'normed_total_scaled_importance', ascending=False)
+
+    all_imp_nt = all_importances_normed_totals
+    all_imp_nt_ls = all_importances_normed_totals_lags_summed
+    return all_imp_nt, all_imp_nt_ls
 
 
 if __name__ == '__main__':
@@ -153,91 +233,21 @@ if __name__ == '__main__':
     #print(sum([len(a) for a in all_column_groups]))
 
     all_column_groups_combinations = list(itertools.product(*all_column_groups))
-    #print(all_column_groups_combinations)
-    #print(len(all_column_groups_combinations))
 
-    n_steps = 3
-    n_trees = 1
+    n_steps = 2
+    n_trees = 10
 
-    all_importance_cols = np.array([[f"importance_{col}", f'mse_{col}', f'r2_{col}',
-                                 f'ev_score_{col}', f'mape_{col}'] for col in df.columns]).ravel()
+    all_imp_nt, all_imp_nt_ls = combi_summed_importances(n_steps,n_trees,all_column_groups_combinations[:],df)
+    #all_imp_nt, all_imp_nt_ls = col_4_cols_importances(n_steps,n_trees,df)
 
-    all_importance_index = [f"{col}_-{i}" for i in range(1,n_steps+1) for col in df.columns]
+    #print(all_imp_nt)
+    #print(all_imp_nt_ls)
 
-    all_importances = pd.DataFrame(index = all_importance_index, columns = all_importance_cols)
-    all_importances_lags_summed = pd.DataFrame(index = df.columns,columns = all_importance_cols)
+    all_imp_nt.plot.bar()
+    plt.tight_layout()
+    plt.show()
 
-    all_column_groups_combinations = all_column_groups_combinations[:]
-
-    with tqdm(all_column_groups_combinations,position=0,leave=True) as pbar:
-        for combi in pbar:
-            (all_combi_importances, all_combi_importances_lags_summed) = combi_importances(combi,df,n_steps,n_trees,pbar)
-
-            sect = all_importances.columns.intersection(all_combi_importances.columns)
-
-            all_importances[sect] = all_importances[sect].add(all_combi_importances[sect],fill_value = 0)
-            all_importances_lags_summed[sect] = all_importances_lags_summed[sect].add(
-                all_combi_importances_lags_summed[sect],fill_value = 0)
-
-
-    all_importances['total_importance'] = all_importances[[f"importance_{col}" for col in df.columns]].sum(axis=1)
-    all_importances['total_mse'] = all_importances[[f"mse_{col}" for col in df.columns]].sum(axis=1)
-    all_importances['total_r2'] = all_importances[[f"r2_{col}" for col in df.columns]].sum(axis=1)
-    all_importances['total_ev_score'] = all_importances[[f"ev_score_{col}" for col in df.columns]].sum(axis=1)
-    all_importances['total_mape'] = all_importances[[f"mape_{col}" for col in df.columns]].sum(axis=1)
-
-    all_importances['normed_total_importance'] = all_importances['total_importance'] / all_importances['total_importance'].sum()
-    all_importances['normed_total_mape'] = all_importances['total_mape'] / all_importances['total_mape'].sum()
-
-    t_i = all_importances['total_importance']
-    n_t_mape = all_importances['normed_total_mape']
-    t_mse = all_importances['total_mse']
-    t_r2 = all_importances['total_r2']
-    t_ev = all_importances['total_ev_score']
-
-    all_importances['scaled_total_importance'] = (t_i * t_ev * t_r2)/ (n_t_mape * t_mse)
-
-    all_importances['normed_scaled_total_importance'] = all_importances['scaled_total_importance'] / all_importances['scaled_total_importance'].sum()
-    all_importances = all_importances.sort_values('normed_scaled_total_importance', ascending=False)
-
-    all_importances_lags_summed['total_importance'] = all_importances_lags_summed[[f"importance_{col}" for col in df.columns]].sum(axis=1)
-    all_importances_lags_summed['total_mse'] = all_importances_lags_summed[[f"mse_{col}" for col in df.columns]].sum(axis=1)
-    all_importances_lags_summed['total_r2'] = all_importances_lags_summed[[f"r2_{col}" for col in df.columns]].sum(axis=1)
-    all_importances_lags_summed['total_ev_score'] = all_importances_lags_summed[[f"ev_score_{col}" for col in df.columns]].sum(axis=1)
-    all_importances_lags_summed['total_mape'] = all_importances_lags_summed[[f"mape_{col}" for col in df.columns]].sum(axis=1)
-
-    all_importances_lags_summed['normed_total_importance'] = all_importances_lags_summed['total_importance'] / all_importances_lags_summed['total_importance'].sum()
-    all_importances_lags_summed['normed_total_mape'] = all_importances_lags_summed['total_mape'] / all_importances_lags_summed['total_mape'].sum()
-
-    t_i_ls = all_importances_lags_summed['total_importance']
-    n_t_mape_ls = all_importances_lags_summed['normed_total_mape']
-    t_mse_ls = all_importances_lags_summed['total_mse']
-    t_r2_ls = all_importances_lags_summed['total_r2']
-    t_ev_ls = all_importances_lags_summed['total_ev_score']
-
-    all_importances_lags_summed['scaled_total_importance'] = (t_i_ls)/(t_mse_ls)
-
-    all_importances_lags_summed['normed_scaled_total_importance'] = all_importances_lags_summed['scaled_total_importance'] / all_importances_lags_summed['scaled_total_importance'].sum()
-    all_importances_lags_summed = all_importances_lags_summed.sort_values('normed_scaled_total_importance', ascending=False)
-
-    all_imp = all_importances[['normed_total_importance','normed_scaled_total_importance']]
-    all_imp_ls = all_importances_lags_summed[['normed_total_importance','normed_scaled_total_importance']]
-
-    #print(all_imp)
-    #print(all_imp_ls)
-
-    #plt.figure()
-    #plt.bar(all_importances.index.values, all_importances['normed_scaled_total_importance'].values)
-    #plt.xticks(rotation=25)
-    #all_imp.plot.bar()
-    #plt.tight_layout()
-    #plt.show()
-
-
-    #plt.figure()
-    #plt.bar(all_importances_lags_summed.index.values, all_importances_lags_summed['normed_scaled_total_importance'].values)
-    #plt.xticks(rotation=25)
-    all_imp_ls.plot.bar()
+    all_imp_nt_ls.plot.bar()
     plt.ylabel('Forecasting Importance')
     plt.tight_layout()
     plt.show()
@@ -245,46 +255,6 @@ if __name__ == '__main__':
 
 
 
-
-
-
-    '''
-    n_steps = 3
-
-
-    all_importances = pd.DataFrame(columns = [f"importance_{col}" for col in df.columns])
-    for col in tqdm(df.columns):
-        importances = get_rf_importances(df,df.columns,col,n_steps,50)
-        for i in range(1, n_steps + 1):
-            importances.loc[f"{col}_-{i}"] = 0
-        col_importances = importances.rename(columns = {'importance':f"importance_{col}"})
-        all_importances[f"importance_{col}"] = col_importances
-
-
-    all_importances['total'] = all_importances.sum(axis = 1)
-
-    all_importances['normed_total'] = all_importances['total']/all_importances['total'].sum()
-
-    all_importances = all_importances.sort_values('normed_total', ascending=False)
-
-    all_importances_lags_summed = pd.DataFrame(columns = all_importances.columns)
-    for col in df.columns:
-        col_lag_sum = all_importances.filter(axis = 0, regex = f"^{col}_-\d+").sum(axis = 0)
-        all_importances_lags_summed.loc[col] = col_lag_sum
-    all_importances_lags_summed = all_importances_lags_summed.sort_values('normed_total', ascending=False)
-
-
-    plt.figure()
-    plt.bar(all_importances.index.values,all_importances['normed_total'].values)
-    plt.xticks(rotation = 25)
-    plt.show()
-
-
-    plt.figure()
-    plt.bar(all_importances_lags_summed.index.values, all_importances_lags_summed['normed_total'].values)
-    plt.xticks(rotation=25)
-    plt.show()
-    '''
 
 
 

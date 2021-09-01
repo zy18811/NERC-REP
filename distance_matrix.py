@@ -201,6 +201,26 @@ def graphFeatureGroupsSubplots(df,featureGrouping,title = None):
     plt.show()
 
 
+def getFeatureGrouping(df,method,kn = None):
+    if method == 'dtw':
+        m = calcDTWDist
+    elif method == 'spearman':
+        m = spearman
+    elif method == 'pearson':
+        m = pearson
+    else:
+        return -1
+    mat = distMatrix(df,m)
+
+    if kn is None:
+        xs, ys = getThresholdandNumFeaturesLeft(mat['fullMatrix'])
+        kn = findKneePoint(xs, ys)
+
+    featureGrouping = compressMatrixValues(mat['fullMatrix'], mat['fullList'], kn)
+    return featureGrouping
+
+
+
 
 
 if __name__ == '__main__':
@@ -217,33 +237,35 @@ if __name__ == '__main__':
     pear_mat = distMatrix(df,pearson)
     spr_mat = distMatrix(df,spearman)
     
-    
+    '''
     #print(mat['fullMatrix'])
     graphMatrixDistribution(dtw_mat['fullMatrix'],title='DTW')
     xs, ys = getThresholdandNumFeaturesLeft(dtw_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
     graphThresholdValues(xs, ys, kneePoint=kn,title='DTW')
-    featureGrouping = compressMatrixValues(dtw_mat['fullMatrix'], dtw_mat['fullList'], 3.25)
+    featureGrouping = compressMatrixValues(dtw_mat['fullMatrix'], dtw_mat['fullList'], 2.5)
     print('DTW',featureGrouping)
     graphFeatureGroupsSubplots(df,featureGrouping,title = 'DTW')
+    '''
 
-
+    '''
     graphMatrixDistribution(pear_mat['fullMatrix'], title='Pearson')
     xs, ys = getThresholdandNumFeaturesLeft(pear_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
     graphThresholdValues(xs, ys, kneePoint=kn, title='Pearson')
-    featureGrouping = compressMatrixValues(pear_mat['fullMatrix'], pear_mat['fullList'], 0.265)
+    featureGrouping = compressMatrixValues(pear_mat['fullMatrix'], pear_mat['fullList'], 0.1)
     print('Pearson', featureGrouping)
     graphFeatureGroupsSubplots(df, featureGrouping, title='Pearson')
+    '''
 
     graphMatrixDistribution(spr_mat['fullMatrix'], title='Spearman')
     xs, ys = getThresholdandNumFeaturesLeft(spr_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
-
+    
     graphThresholdValues(xs, ys, kneePoint=kn, title='Spearman')
-    featureGrouping = compressMatrixValues(spr_mat['fullMatrix'], spr_mat['fullList'], 0.5)
+    featureGrouping = compressMatrixValues(spr_mat['fullMatrix'], spr_mat['fullList'], 0.1)
     print('Spearman', featureGrouping)
     graphFeatureGroupsSubplots(df, featureGrouping, title='Spearman')

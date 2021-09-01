@@ -81,6 +81,9 @@
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -100,6 +103,9 @@
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -119,6 +125,9 @@
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -138,6 +147,9 @@
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -175,9 +187,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.rf" />
+        <item itemvalue="Python.distance_matrix" />
         <item itemvalue="Python.july21_get_all_data" />
         <item itemvalue="Python.july21_get_cosmos_data" />
-        <item itemvalue="Python.distance_matrix" />
         <item itemvalue="Python.july21_get_flux_data" />
       </list>
     </recent_temporary>
@@ -202,7 +214,8 @@
       <workItem from="1629899511985" duration="21843000" />
       <workItem from="1630051039355" duration="22255000" />
       <workItem from="1630315119355" duration="70000" />
-      <workItem from="1630316241724" duration="21883000" />
+      <workItem from="1630316241724" duration="25519000" />
+      <workItem from="1630490499572" duration="8070000" />
     </task>
     <servers />
   </component>
