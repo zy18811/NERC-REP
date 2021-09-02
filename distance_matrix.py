@@ -198,6 +198,7 @@ def graphFeatureGroupsSubplots(df,featureGrouping,title = None):
             plt.plot(df[col].index.values, df[col].values, label=col)
         plt.legend()
         count += 1
+    plt.tight_layout()
     plt.show()
 
 
@@ -237,35 +238,35 @@ if __name__ == '__main__':
     pear_mat = distMatrix(df,pearson)
     spr_mat = distMatrix(df,spearman)
     
-    '''
+
     #print(mat['fullMatrix'])
-    graphMatrixDistribution(dtw_mat['fullMatrix'],title='DTW')
+    #graphMatrixDistribution(dtw_mat['fullMatrix'],title='DTW')
     xs, ys = getThresholdandNumFeaturesLeft(dtw_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
-    graphThresholdValues(xs, ys, kneePoint=kn,title='DTW')
-    featureGrouping = compressMatrixValues(dtw_mat['fullMatrix'], dtw_mat['fullList'], 2.5)
+    #graphThresholdValues(xs, ys, kneePoint=kn,title='DTW')
+    featureGrouping = compressMatrixValues(dtw_mat['fullMatrix'], dtw_mat['fullList'], 2.7)
     print('DTW',featureGrouping)
     graphFeatureGroupsSubplots(df,featureGrouping,title = 'DTW')
-    '''
 
-    '''
-    graphMatrixDistribution(pear_mat['fullMatrix'], title='Pearson')
+
+
+    #graphMatrixDistribution(pear_mat['fullMatrix'], title='Pearson')
     xs, ys = getThresholdandNumFeaturesLeft(pear_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
-    graphThresholdValues(xs, ys, kneePoint=kn, title='Pearson')
+    #graphThresholdValues(xs, ys, kneePoint=kn, title='Pearson')
     featureGrouping = compressMatrixValues(pear_mat['fullMatrix'], pear_mat['fullList'], 0.1)
     print('Pearson', featureGrouping)
     graphFeatureGroupsSubplots(df, featureGrouping, title='Pearson')
-    '''
 
-    graphMatrixDistribution(spr_mat['fullMatrix'], title='Spearman')
+
+    #graphMatrixDistribution(spr_mat['fullMatrix'], title='Spearman')
     xs, ys = getThresholdandNumFeaturesLeft(spr_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
     
-    graphThresholdValues(xs, ys, kneePoint=kn, title='Spearman')
+    #graphThresholdValues(xs, ys, kneePoint=kn, title='Spearman')
     featureGrouping = compressMatrixValues(spr_mat['fullMatrix'], spr_mat['fullList'], 0.1)
     print('Spearman', featureGrouping)
     graphFeatureGroupsSubplots(df, featureGrouping, title='Spearman')

@@ -104,7 +104,6 @@ def combi_importances(combi,df,n_steps, n_trees,pbar):
                                f'ev_score_{col}', f'mape_{col}']] = col_importances
         i+=1
 
-
     return all_combi_importances
 
 
@@ -141,13 +140,17 @@ def combi_summed_importances(n_steps,n_trees,combis,df):
     all_column_groups_combinations = combis
 
     with tqdm(all_column_groups_combinations, position=0, leave=True) as pbar:
+        i = 0
         for combi in pbar:
             all_combi_importances = combi_importances(combi, df, n_steps, n_trees, pbar)
-
+            #pickle.dump(all_combi_importances, open(f"Combi Importances/combi_{i}_imps_{n_steps}_steps_{n_trees}_trees.pkl",
+                                                    #'wb'), protocol=pickle.HIGHEST_PROTOCOL)
             sect = all_importances.columns.intersection(all_combi_importances.columns)
 
             all_importances[sect] = all_importances[sect].add(all_combi_importances[sect], fill_value=0)
+            i+=1
 
+    #pickle.dump(all_importances, open(f"all_combi_imps_{n_steps}_steps_{n_trees}_trees.pkl", 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
     all_importances = total_norm_scale_sort(all_importances, df)
     all_importances_normed_totals = all_importances[['normed_total_importance', 'normed_total_scaled_importance']]
     all_importances_normed_totals_lags_summed = pd.DataFrame(columns=all_importances_normed_totals.columns)
@@ -180,6 +183,7 @@ def col_4_cols_importances(n_steps,n_trees,df):
         all_importances[[f"importance_{col}", f'mse_{col}', f'r2_{col}',
                          f'ev_score_{col}', f'mape_{col}']] = col_importances
 
+
     all_importances = total_norm_scale_sort(all_importances, df)
     all_importances_normed_totals = all_importances[['normed_total_importance', 'normed_total_scaled_importance']]
     all_importances_normed_totals_lags_summed = pd.DataFrame(columns=all_importances_normed_totals.columns)
@@ -193,6 +197,94 @@ def col_4_cols_importances(n_steps,n_trees,df):
     all_imp_nt = all_importances_normed_totals
     all_imp_nt_ls = all_importances_normed_totals_lags_summed
     return all_imp_nt, all_imp_nt_ls
+
+
+def group_sample_importances(all_column_groups, df, n_steps, n_trees):
+    n_groups = len(all_column_groups)
+    
+
+    importance_cols = np.array([[f"importance_group_{i}", f'mse_group_{i}', f'r2_group_{i}',
+                                 f'ev_score_group_{i}', f'mape_group_{i}'] for i in range(1, n_groups + 1)]).ravel()
+    sample_importances = pd.DataFrame(columns=importance_cols)
+
+    sample_cols = [np.random.choice(grp) for grp in all_column_groups]
+    for col in sample_cols:
+
+        importances = get_rf_importances(df, sample_cols, col, n_steps, n_trees)
+        for i in range(1, n_steps + 1):
+            importances.loc[f"{col}_-{i}", 'importance'] = 0
+        importances = importances.fillna(importances.mean())
+        col_importances = importances.rename(columns={'importance': f"importance_group_{sample_cols.index(col) + 1}",
+                                                      'mse': f"mse_group_{sample_cols.index(col) + 1}",
+                                                      'r2': f"r2_group_{sample_cols.index(col) + 1}",
+                                                      'ev_score': f"ev_score_group_{sample_cols.index(col) + 1}",
+                                                      'mape': f"mape_group_{sample_cols.index(col) + 1}"})
+
+        sample_importances[[f"importance_group_{sample_cols.index(col) + 1}", f'mse_group_{sample_cols.index(col) + 1}',
+                           f'r2_group_{sample_cols.index(col) + 1}', f'ev_score_group_{sample_cols.index(col) + 1}',
+                           f'mape_group_{sample_cols.index(col) + 1}']] = col_importances
+
+    sample_importances_new_index = [f'group_{sample_cols.index(col[:-3]) + 1}{col[-3:]}' for col in
+                                   sample_importances.index.values]
+
+    index_mapper = {f'{key}': f'{value}' for (key, value) in
+                    zip(sample_importances.index.values, sample_importances_new_index)}
+
+
+    sample_importances = sample_importances.rename(index=index_mapper)
+
+
+    return sample_importances
+
+
+def group_4_groups_importances(all_groups,df,n_steps,n_trees,n_samples):
+    n_groups = len(all_column_groups)
+
+
+    importance_index = np.array([f'group_{i}_-{j}' for i in range(1,n_groups+1) for j in range(1,n_steps+1)])
+
+    importance_cols = np.array([[f'normed_total_importance_sample_{i}',f'normed_total_scaled_importance_sample_{i}'] for i in range(1,n_samples+1)]).ravel()
+    group_importances = pd.DataFrame(index = importance_index, columns=importance_cols)
+    
+    for i in tqdm(range(1,n_samples+1)):
+        sample_importances = group_sample_importances(all_groups,df,n_steps,n_trees)
+        for ind in group_importances.index.values:
+            group = f'{ind[:-3]}'
+            scale_func = lambda x: x[f'importance_{group}'] * x[f'r2_{group}']  # / x[f'mape_{col}']
+            sample_importances = sample_importances.assign(new_col=scale_func)
+            sample_importances = sample_importances.rename(columns={'new_col': f'scaled_importance_{group}'})
+       
+        sample_importances['total_importance'] = sample_importances[[f"importance_group_{i}" for i in range(1,n_groups+1)]].sum(axis=1)
+        sample_importances['total_scaled_importance'] = sample_importances[[f"scaled_importance_group_{i}" for i in range(1,n_groups+1)]].sum(axis=1)
+
+        sample_importances['normed_total_importance'] = sample_importances['total_importance'] / sample_importances[
+            'total_importance'].sum()
+        if sample_importances['total_scaled_importance'].min() < 0:
+            min_val = sample_importances['total_scaled_importance'].min()
+            sample_importances['normed_total_scaled_importance'] = (sample_importances[
+                                                                       'total_scaled_importance'] - min_val) / (
+                                                                              sample_importances[
+                                                                                  'total_scaled_importance'] - min_val).sum()
+        else:
+            sample_importances['normed_total_scaled_importance'] = sample_importances['total_scaled_importance'] / \
+                                                                  sample_importances['total_scaled_importance'].sum()
+
+        group_importances[[f'normed_total_importance_sample_{i}',f'normed_total_scaled_importance_sample_{i}']] = \
+            sample_importances[['normed_total_importance','normed_total_scaled_importance']]
+
+    group_importances['normed_total_importance'] = group_importances.filter(axis=1,regex='^normed_total_importance_sample_\d+').mean(axis = 1)
+    group_importances['normed_total_scaled_importance'] = group_importances.filter(axis=1, regex='^normed_total_scaled_importance_sample_\d+').mean(axis=1)
+    group_importances = group_importances.sort_values('normed_total_scaled_importance', ascending=False)
+    group_importances_nt = group_importances[['normed_total_importance','normed_total_scaled_importance']]
+    group_importances_nt_ls = pd.DataFrame(columns = group_importances_nt.columns)
+
+    for i in range(1,n_groups+1):
+        group_ls = group_importances_nt.filter(axis=0, regex=f"^group_{i}_-\d+").sum(axis=0)
+        group_importances_nt_ls.loc[f'group_{i}'] = group_ls
+
+    group_importances_nt_ls = group_importances_nt_ls.sort_values('normed_total_scaled_importance', ascending=False)
+        
+    return group_importances_nt, group_importances_nt_ls
 
 
 if __name__ == '__main__':
@@ -232,18 +324,48 @@ if __name__ == '__main__':
 
     #print(sum([len(a) for a in all_column_groups]))
 
+
+    n_steps = 5
+    n_trees = 200
+    n_samples = 50
+
+    gi_nt, gi_nt_ls = group_4_groups_importances(all_column_groups,df,n_steps,n_trees,n_samples)
+    #print(gi_nt)
+    #print(gi_nt_ls)
+
+    i = 1
+    for group in all_column_groups:
+        print(f"Group {i} is {' ,'.join(group)}")
+        i+=1
+
+    gi_nt.plot.bar()
+    plt.ylabel('Forecasting Importance')
+    plt.tight_layout()
+    plt.show()
+
+
+    gi_nt_ls.plot.bar()
+    plt.ylabel('Forecasting Importance')
+    plt.tight_layout()
+    plt.show()
+
+
+
+    '''
     all_column_groups_combinations = list(itertools.product(*all_column_groups))
 
-    n_steps = 2
-    n_trees = 10
+    n_steps = 3
+    n_trees = 15
 
-    all_imp_nt, all_imp_nt_ls = combi_summed_importances(n_steps,n_trees,all_column_groups_combinations[:],df)
-    #all_imp_nt, all_imp_nt_ls = col_4_cols_importances(n_steps,n_trees,df)
-
+    #all_imp_nt, all_imp_nt_ls = combi_summed_importances(n_steps,n_trees,all_column_groups_combinations[:],df)
+    all_imp_nt, all_imp_nt_ls = col_4_cols_importances(n_steps,n_trees,df)
+    #pickle.dump((all_imp_nt, all_imp_nt_ls), open(f"all_combi_total_imps_{n_steps}_steps_{n_trees}_trees.pkl", 'wb'),
+                #protocol=pickle.HIGHEST_PROTOCOL)
     #print(all_imp_nt)
     #print(all_imp_nt_ls)
 
     all_imp_nt.plot.bar()
+    plt.ylabel('Forecasting Importance')
     plt.tight_layout()
     plt.show()
 
@@ -251,7 +373,7 @@ if __name__ == '__main__':
     plt.ylabel('Forecasting Importance')
     plt.tight_layout()
     plt.show()
-
+    '''
 
 
 
