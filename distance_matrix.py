@@ -12,7 +12,7 @@ from kneed import KneeLocator
 from scipy.stats import spearmanr
 from scipy.stats import pearsonr
 from scipy.stats import ks_2samp
-from matrix_heatmap import heatmap, annotate_heatmap
+
 
 zeroValue = 1*(10**-3)
 
