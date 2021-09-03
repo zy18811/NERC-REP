@@ -54,7 +54,7 @@
       <recent name="D:\NERC REP 21\NERC REP Repo\NERC-REP\Field_Inputs\excel fields" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.rf">
+  <component name="RunManager" selected="Python.distance_matrix">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -166,6 +166,9 @@
       <module name="NERC-REP" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -183,8 +186,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.rf" />
         <item itemvalue="Python.distance_matrix" />
+        <item itemvalue="Python.rf" />
         <item itemvalue="Python.july21_get_all_data" />
         <item itemvalue="Python.july21_get_cosmos_data" />
         <item itemvalue="Python.july21_get_flux_data" />
@@ -215,6 +218,7 @@
       <workItem from="1630490499572" duration="8098000" />
       <workItem from="1630507832691" duration="823000" />
       <workItem from="1630511622924" duration="17263000" />
+      <workItem from="1630660479279" duration="6375000" />
     </task>
     <servers />
   </component>

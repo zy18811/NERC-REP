@@ -7,10 +7,12 @@ from tqdm import tqdm
 from july21_get_all_data import get_july21_all_data
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+import seaborn as sns
 from kneed import KneeLocator
 from scipy.stats import spearmanr
 from scipy.stats import pearsonr
 from scipy.stats import ks_2samp
+from matrix_heatmap import heatmap, annotate_heatmap
 
 zeroValue = 1*(10**-3)
 
@@ -142,7 +144,26 @@ def graphMatrixDistribution(matrix,title = None):
     plt.ylabel("Frequency")
     plt.show()
 
+def graphMatrixHeatmap(matrix, title = None,palette = 'Spectral_r',custom_cmap = None):
+    labels = matrix['fullList'].values
 
+    sns.set_theme(style="white")
+    mask = np.triu(np.ones_like(matrix['fullMatrix'], dtype=bool), 1)
+
+    f, ax = plt.subplots(figsize=(11, 9))
+
+    if custom_cmap is None:
+        cmap = sns.color_palette(palette, as_cmap=True)
+    else:
+        cmap = custom_cmap
+
+    sns.heatmap(matrix['fullMatrix'], mask=mask, cmap=cmap, center=0, xticklabels=labels, yticklabels=labels,
+                square=True, linewidths=.5, cbar_kws={"shrink": .5, 'label': 'Distance Value'})
+
+    if title!=None:
+        plt.title(title)
+    plt.tight_layout()
+    plt.show()
 
 def getThresholdandNumFeaturesLeft(matrix):
     """
@@ -237,36 +258,41 @@ if __name__ == '__main__':
     dtw_mat = distMatrix(df,calcDTWDist)
     pear_mat = distMatrix(df,pearson)
     spr_mat = distMatrix(df,spearman)
+    #print(dtw_mat)
+
+
+
     
 
-    #print(mat['fullMatrix'])
     #graphMatrixDistribution(dtw_mat['fullMatrix'],title='DTW')
+    graphMatrixHeatmap(dtw_mat, title = 'DTW')
     xs, ys = getThresholdandNumFeaturesLeft(dtw_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
     #graphThresholdValues(xs, ys, kneePoint=kn,title='DTW')
     featureGrouping = compressMatrixValues(dtw_mat['fullMatrix'], dtw_mat['fullList'], 2.7)
     print('DTW',featureGrouping)
-    graphFeatureGroupsSubplots(df,featureGrouping,title = 'DTW')
+    #graphFeatureGroupsSubplots(df,featureGrouping,title = 'DTW')
 
 
 
     #graphMatrixDistribution(pear_mat['fullMatrix'], title='Pearson')
+    graphMatrixHeatmap(pear_mat,title = 'Pearson')
     xs, ys = getThresholdandNumFeaturesLeft(pear_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
     #graphThresholdValues(xs, ys, kneePoint=kn, title='Pearson')
     featureGrouping = compressMatrixValues(pear_mat['fullMatrix'], pear_mat['fullList'], 0.1)
     print('Pearson', featureGrouping)
-    graphFeatureGroupsSubplots(df, featureGrouping, title='Pearson')
+    #graphFeatureGroupsSubplots(df, featureGrouping, title='Pearson')
 
 
     #graphMatrixDistribution(spr_mat['fullMatrix'], title='Spearman')
+    graphMatrixHeatmap(spr_mat,title = 'Spearman')
     xs, ys = getThresholdandNumFeaturesLeft(spr_mat['fullMatrix'])
     kn = findKneePoint(xs, ys)
 
-    
     #graphThresholdValues(xs, ys, kneePoint=kn, title='Spearman')
     featureGrouping = compressMatrixValues(spr_mat['fullMatrix'], spr_mat['fullList'], 0.1)
     print('Spearman', featureGrouping)
-    graphFeatureGroupsSubplots(df, featureGrouping, title='Spearman')
+    #graphFeatureGroupsSubplots(df, featureGrouping, title='Spearman')
