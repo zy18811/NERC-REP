@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from july21_get_all_data import get_july21_all_data
+from distance_matrix import get_n_groups, calcDTWDist, pearson, spearman
 from sklearn import preprocessing
 from tqdm import tqdm
 from sklearn.ensemble import RandomForestRegressor
@@ -8,6 +9,7 @@ from sklearn import metrics
 import itertools
 import pickle
 import matplotlib.pyplot as plt
+
 
 
 
@@ -201,7 +203,7 @@ def col_4_cols_importances(n_steps,n_trees,df):
 
 def group_sample_importances(all_column_groups, df, n_steps, n_trees):
     n_groups = len(all_column_groups)
-    
+
 
     importance_cols = np.array([[f"importance_group_{i}", f'mse_group_{i}', f'r2_group_{i}',
                                  f'ev_score_group_{i}', f'mape_group_{i}'] for i in range(1, n_groups + 1)]).ravel()
@@ -238,7 +240,8 @@ def group_sample_importances(all_column_groups, df, n_steps, n_trees):
 
 
 def group_4_groups_importances(all_groups,df,n_steps,n_trees,n_samples):
-    n_groups = len(all_column_groups)
+    n_groups = len(all_groups)
+
 
 
     importance_index = np.array([f'group_{i}_-{j}' for i in range(1,n_groups+1) for j in range(1,n_steps+1)])
@@ -248,8 +251,10 @@ def group_4_groups_importances(all_groups,df,n_steps,n_trees,n_samples):
     
     for i in tqdm(range(1,n_samples+1)):
         sample_importances = group_sample_importances(all_groups,df,n_steps,n_trees)
+
         for ind in group_importances.index.values:
             group = f'{ind[:-3]}'
+
             scale_func = lambda x: x[f'importance_{group}'] * x[f'r2_{group}']  # / x[f'mape_{col}']
             sample_importances = sample_importances.assign(new_col=scale_func)
             sample_importances = sample_importances.rename(columns={'new_col': f'scaled_importance_{group}'})
@@ -285,6 +290,50 @@ def group_4_groups_importances(all_groups,df,n_steps,n_trees,n_samples):
     group_importances_nt_ls = group_importances_nt_ls.sort_values('normed_total_scaled_importance', ascending=False)
         
     return group_importances_nt, group_importances_nt_ls
+
+
+def group_importance_plot(df, groups, n_steps, n_trees, n_samples, prefix = None):
+    gi_nt, gi_nt_ls = group_4_groups_importances(groups, df, n_steps, n_trees, n_samples)
+    i = 1
+
+    for group in groups:
+        print(f"{prefix} Group {i} is {' ,'.join(group)}")
+        i += 1
+
+    gi_nt.plot.bar()
+    plt.ylabel('Forecasting Importance')
+    plt.title(f'{prefix}')
+    plt.tight_layout()
+    plt.show()
+
+    gi_nt_ls.plot.bar()
+    plt.ylabel('Forecasting Importance')
+    plt.title(f'{prefix}')
+    plt.tight_layout()
+    plt.show()
+
+
+def group_and_get_importances(df, method, n_groups, n_steps, n_trees, n_samples, use_minThresh = True, use_maxThresh = False):
+    min_thresh_groups, max_thresh_groups = get_n_groups(df,method,n_groups)
+
+    if use_minThresh and use_maxThresh:
+        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Min Thresh')
+        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Max Thresh')
+    elif use_minThresh:
+        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Min Thresh')
+    elif use_maxThresh:
+        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Max Thresh')
+    else:
+        return
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -324,11 +373,14 @@ if __name__ == '__main__':
 
     #print(sum([len(a) for a in all_column_groups]))
 
+    n_groups = 5
+    n_steps = 2
+    n_trees = 5
+    n_samples = 10
 
-    n_steps = 5
-    n_trees = 200
-    n_samples = 50
+    group_and_get_importances(df, calcDTWDist,n_groups,n_steps,n_trees,n_samples,use_minThresh=True, use_maxThresh=True)
 
+    """
     gi_nt, gi_nt_ls = group_4_groups_importances(all_column_groups,df,n_steps,n_trees,n_samples)
     #print(gi_nt)
     #print(gi_nt_ls)
@@ -348,7 +400,7 @@ if __name__ == '__main__':
     plt.ylabel('Forecasting Importance')
     plt.tight_layout()
     plt.show()
-
+    """
 
 
     '''

@@ -242,6 +242,24 @@ def getFeatureGrouping(df,method,kn = None):
     return featureGrouping
 
 
+def get_n_groups(df,method,n):
+    mat = distMatrix(df, method)
+    xs, ys = getThresholdandNumFeaturesLeft(mat['fullMatrix'])
+    xs = np.array(xs)
+    ys = np.array(ys)
+    n_kns = xs[np.where(ys == n)]
+    min_thresh = n_kns.min()
+    max_thresh = n_kns.max()
+
+    min_groups = compressMatrixValues(mat['fullMatrix'],mat['fullList'],min_thresh)
+    min_groups = [list(g) for g in min_groups]
+
+    max_groups = compressMatrixValues(mat['fullMatrix'],mat['fullList'],max_thresh)
+    max_groups = [list(g) for g in max_groups]
+
+
+    return min_groups,max_groups
+
 
 
 
@@ -255,6 +273,11 @@ if __name__ == '__main__':
     x_scaled = min_max_scaler.fit_transform(x)
     df = pd.DataFrame(x_scaled, columns=df.columns)
 
+
+    min_g, max_g, = get_n_groups(df,calcDTWDist,3)
+    print(max_g)
+
+    """
     dtw_mat = distMatrix(df,calcDTWDist)
     pear_mat = distMatrix(df,pearson)
     spr_mat = distMatrix(df,spearman)
@@ -263,7 +286,7 @@ if __name__ == '__main__':
 
 
     
-
+    
     #graphMatrixDistribution(dtw_mat['fullMatrix'],title='DTW')
     graphMatrixHeatmap(dtw_mat, title = 'DTW')
     xs, ys = getThresholdandNumFeaturesLeft(dtw_mat['fullMatrix'])
@@ -296,3 +319,4 @@ if __name__ == '__main__':
     featureGrouping = compressMatrixValues(spr_mat['fullMatrix'], spr_mat['fullList'], 0.1)
     print('Spearman', featureGrouping)
     #graphFeatureGroupsSubplots(df, featureGrouping, title='Spearman')
+    """
