@@ -21,7 +21,6 @@ $ python simple_file_downloader.py $URL
 
 # Import standard libraries
 import os
-import sys
 import datetime
 import requests
 
@@ -31,8 +30,6 @@ from cryptography.hazmat.backends import default_backend
 from contrail.security.onlineca.client import OnlineCaClient
 
 CERTS_DIR = os.path.dirname(os.path.realpath(__file__))+'/.certs'
-print(CERTS_DIR)
-#CERTS_DIR = os.path.expanduser('~/.certs')
 if not os.path.isdir(CERTS_DIR):
     os.makedirs(CERTS_DIR)
 
@@ -69,7 +66,7 @@ def cert_is_valid(cert_file, min_lifetime=0):
             and cert.not_valid_after > now + datetime.timedelta(0, min_lifetime))
 
 
-def setup_credentials():
+def setup_credentials(username, password):
     """
     Download and create required credentials files.
     Return True if credentials were set up.
@@ -81,14 +78,8 @@ def setup_credentials():
     # Test for DODS_FILE and only re-get credentials if it doesn't
     # exist AND `force` is True AND certificate is in-date.
     if cert_is_valid(CREDENTIALS_FILE_PATH):
-        print('[INFO] Security credentials already set up.')
+        #print('[INFO] Security credentials already set up.')
         return False
-
-    # Get CEDA username and password from environment variables
-    #username = os.environ['CEDA_USERNAME']
-    #password = os.environ['CEDA_PASSWORD']
-    username = '***REMOVED***'
-    password = '***REMOVED***'
 
     onlineca_client = OnlineCaClient()
     onlineca_client.ca_cert_dir = TRUSTROOTS_DIR
@@ -110,22 +101,24 @@ def setup_credentials():
     return True
 
 
-def download_file(file_url,save_path):
+def download_file(file_url, save_path, username, password):
     """
-    Main controller function.
-    :param nc_file_url: URL to a NetCDF4 opendap end-point.
-    :param var_id: Variable ID [String]
+    Downloads file from CEDA
+    :param file_url: url of file to download
+    :param save_path: path to save file to
+    :param username: CEDA username
+    :param password: CEDA password
     :return: None
     """
 
     try:
-        setup_credentials()
+        setup_credentials(username, password)
     except KeyError:
         print("CEDA_USERNAME and CEDA_PASSWORD environment variables required")
         return
 
     # Download file to current working directory
-    response = requests.get(file_url, cert=(CREDENTIALS_FILE_PATH), verify=True)
+    response = requests.get(file_url, cert=CREDENTIALS_FILE_PATH, verify=True)
     filename = file_url.rsplit('/', 1)[-1]
     print(f"Downloaded {filename}")
     filename = os.path.join(save_path,filename)
@@ -134,8 +127,4 @@ def download_file(file_url,save_path):
 
 
 if __name__ == '__main__':
-    url = "https://dap.ceda.ac.uk/badc/ukmo-midas-open/data/uk-soil-temperature-obs/dataset-version-202007/west-yorkshire/00534_bramham/qc-version-1/midas-open_uk-soil-temperature-obs_dv-202007_west-yorkshire_00534_bramham_qcv-1_3000.csv"
-    try:
-        download_file(url,'Temp_Test')
-    except IndexError:
-        print("Please provide a file URL as input")
+    pass
