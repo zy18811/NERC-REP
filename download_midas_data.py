@@ -152,7 +152,7 @@ if __name__ == '__main__':
     """
     Tests download works
     """
-    download_midas_full([2020],'Test Folder')
+    download_midas_full([2021],'Hanger Field July 2021/MIDAS Data', daily_rain=False)
 
 
 
