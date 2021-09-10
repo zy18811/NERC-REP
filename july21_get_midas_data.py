@@ -122,7 +122,7 @@ def get_july21_rain_data():
     """
     # reads the hourly rainfall data for 2021-22
     df = pd.read_csv("Hanger Field July 2021/MIDAS Data/MIDAS Rain Data/Hourly/midas_rainhrly_202101-202112.txt",
-                     header=0, low_memory=False,
+                     header=0, low_memory=False, usecols=[i for i in range(0, 15)],
                      index_col=False, names=['ob_end_time',
                                              'id',
                                              'id_type',
@@ -303,5 +303,6 @@ if __name__ == '__main__':
     """
     prints dataframe
     """
+
     midas0721 = get_july21_midas_data()
     print(midas0721)

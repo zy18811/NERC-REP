@@ -178,6 +178,7 @@ def graphMatrixHeatmap(matrix, title = None,palette = 'Spectral_r'):
     cmap = sns.color_palette(palette, as_cmap=True)
 
     # plots heatmap
+    plt.figure()
     sns.heatmap(matrix['fullMatrix'], mask=mask, cmap=cmap, center=0, xticklabels=labels, yticklabels=labels,
                 square=True, linewidths=.5, cbar_kws={"shrink": .5, 'label': 'Distance Value'})
 
@@ -241,8 +242,8 @@ def graphThresholdValues(xs,ys,kneePoint,title = None):
     if title is not None:
         plt.title(title)
 
-    plt.xlabel(f"Threshold values, raw knee at {kneePoint:.2f}")
-    plt.ylabel(f"Number of grouped features, raw knee at {(ys[list(xs).index(kneePoint)]):.2f}")
+    plt.xlabel(f"Threshold values, knee at {kneePoint:.2f}")
+    plt.ylabel(f"Number of grouped features, knee at {(ys[list(xs).index(kneePoint)]):.2f}")
     plt.legend()
     plt.show()
 
@@ -267,7 +268,6 @@ def graphFeatureGroupsSubplots(df,featureGrouping,title = None):
             plt.plot(df[col].index.values, df[col].values, label=col)
         plt.legend()
         count += 1
-    plt.tight_layout()
     plt.show()
 
 
