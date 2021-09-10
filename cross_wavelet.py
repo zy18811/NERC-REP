@@ -16,7 +16,7 @@ def cross_wavelet(df, col1, col2, x_skip=20, y_skip=5, y_lim=400, box_pdf_s1=Fal
     """
     Perfroms cross-wavelet analysis on col1 and col2 of df and plots results
 
-    :param df: dataframe, index should be time
+    :param df: dataframe, index should be in time order
     :param col1: Column name of df
     :param col2: Column name of df
     :param x_skip: Spread of phase arrows in x direction
@@ -231,5 +231,5 @@ if __name__ == '__main__':
     col1 = 'COSMOS_VWC'
     col2 = 'co2_flux'
 
-    cross_wavelet(df, col1, col2)
+    cross_wavelet(df, col1, col2,cache=True)
 
