@@ -21,7 +21,7 @@ def get_july21_cosmos_data(raw_or_interp = 'raw'):
                      header=0, usecols=[i for i in range(0,28)], names=col_names, skiprows=4,
                      parse_dates=['date_time'], dayfirst=True)
 
-    # drops unused column
+    # drops empty column
     df = df.drop('SNOWD_DISTANCE_COR_LEVEL2',axis = 1)
     df = df.set_index('date_time')
     df.index.name = None
