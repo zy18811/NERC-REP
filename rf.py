@@ -473,12 +473,12 @@ def plot_n_groups_importances(df, method, n_groups, n_steps, n_trees, n_samples,
 
     # plot figures
     if use_minThresh and use_maxThresh:
-        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Min Thresh')
-        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Max Thresh')
+        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Approach 3 Min Thresh')
+        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Approach 3 Max Thresh')
     elif use_minThresh:
-        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Min Thresh')
+        group_importance_plot(df, min_thresh_groups, n_steps, n_trees, n_samples, 'Approach 3 Min Thresh')
     elif use_maxThresh:
-        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Max Thresh')
+        group_importance_plot(df, max_thresh_groups, n_steps, n_trees, n_samples, 'Approach 3 Max Thresh')
     else:
         return
 
@@ -512,7 +512,7 @@ def plot_cols_4_cols_importances(df, n_steps, n_trees):
     :return:
     """
     all_imp_nt, all_imp_nt_ls = col_4_cols_importances(n_steps, n_trees, df)
-    plotColumnImportances(all_imp_nt,all_imp_nt_ls,'Dataframe Columns Cartesian Product')
+    plotColumnImportances(all_imp_nt,all_imp_nt_ls,'Approach 1')
 
 
 def plot_combi_summed_importances(df, combinations,n_steps, n_trees, pickle_dfs = False):
@@ -529,7 +529,7 @@ def plot_combi_summed_importances(df, combinations,n_steps, n_trees, pickle_dfs 
     if pickle_dfs:
         pickle.dump((all_imp_nt, all_imp_nt_ls), open(f"all_combi_total_imps_{n_steps}_steps_{n_trees}_trees.pkl", 'wb'),
                     protocol=pickle.HIGHEST_PROTOCOL)
-    plotColumnImportances(all_imp_nt, all_imp_nt_ls,'Column Combinations Cartesian Product')
+    plotColumnImportances(all_imp_nt, all_imp_nt_ls,'Approach 2')
 
 
 if __name__ == '__main__':
